@@ -56,22 +56,8 @@ export class EthersService {
   async calculate(a: number, b: number, operation: string) {
     // Todo: calculate 함수를 실행하여 Calculate 이벤트의 값을 받아 리턴합니다.
     // ⚠️ 리턴은 Number 단위로 리턴합니다.
-    let result: number;
 
-    const calculate = await this.contract.calculate(a, b, operation);
-    const receipt = await calculate.wait();
-
-    for (const log of receipt.logs) {
-      try {
-        const parsed = this.contract.interface.parseLog(log) as LogDescription;
-        if (parsed.name === 'Calculate') {
-          result = parsed.args.result;
-          return Number(result);
-        }
-      } catch (err) {
-        continue;
-      }
-    }
+    return;
   }
 
   async getLastResult(address: string) {
