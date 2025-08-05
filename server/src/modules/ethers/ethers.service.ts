@@ -56,25 +56,87 @@ export class EthersService {
   async calculate(a: number, b: number, operation: string) {
     // Todo: calculate 함수를 실행하여 Calculate 이벤트의 값을 받아 리턴합니다.
     // ⚠️ 리턴은 Number 단위로 리턴합니다.
-
-    return;
+    
+    try {
+      // 트랜잭션 실행
+      const tx = await this.contract.calculate(a, b, operation);
+      
+      // 트랜잭션 완료 대기
+      const receipt = await tx.wait();
+      
+      // 로그에서 Calculate 이벤트 찾기
+      for (const log of receipt.logs) {
+        try {
+          // 로그를 파싱하여 이벤트 확인
+          const parsedLog = this.contract.interface.parseLog({
+            topics: log.topics,
+            data: log.data
+          });
+          
+          // Calculate 이벤트인지 확인
+          if (parsedLog?.name === 'Calculate') {
+            // result 값을 Number로 변환하여 반환
+            return Number(parsedLog.args.result);
+          }
+        } catch (parseError) {
+          // 파싱 실패한 로그는 무시하고 계속
+          continue;
+        }
+      }
+      
+      throw new Error('Calculate event not found in transaction logs');
+    } catch (error) {
+      throw error;
+    }
   }
+
 
   async getLastResult(address: string) {
     // Todo: getLastResult의 값을 리턴합니다.
-
-    return;
+    
+    try {
+      const result = await this.contract.getLastResult(address);
+      return result;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getHistoryLength(address: string) {
     // Todo: getHistoryLength의 값을 리턴합니다.
-
-    return;
+    
+    try {
+      const length = await this.contract.getHistoryLength(address);
+      return length;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getHistoryItem(address: string) {
     // Todo: getHistoryItem의 값을 리턴합니다.
+    
+    try {
+      const historyItems = await this.contract.getHistoryItem(address);
+      return historyItems;
+    } catch (error) {
+      throw error;
+    }
+  }
 
-    return;
+  async getContractInfo() {
+    try {
+      const network = await this.provider.getNetwork();
+      
+      return {
+        contractAddress: address, // ABI 파일에서 가져온 주소
+        network: network.name,
+        chainId: Number(network.chainId),
+        rpcUrl: this.configService.get<string>('RPC_URL'),
+        signerAddress: this.signer.address
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }
